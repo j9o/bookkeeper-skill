@@ -167,6 +167,7 @@ When the user describes a transaction or set of transactions:
 
 1. Load COA from `.bookkeeper/chart-of-accounts.md` (create accounts if needed, note any new ones)
 2. Build journal entries with: Date, Entry #, Account Code, Account Name, Debit, Credit, Memo
+   - **Entry # format:** `JE-YYYYMM-NNN` (e.g., `JE-202401-001`). Sequence resets each month. When adding entries to an existing month, check the latest Entry # in the period's journal entries file and increment.
 3. Verify each entry balances (total debits = total credits)
 4. Output as formatted .xlsx using the `xlsx` skill
 5. **Memory:** Update COA if new accounts were created. Log in audit log.

@@ -158,26 +158,4 @@ To support a new data source, document:
 5. **Deduplication key** (which field is unique per transaction)
 6. **Known quirks** (currency rows, pending vs posted, timezone issues)
 
-### Future Source Templates
-
-These are common sources that may be added. Use the mapping hints if the user provides data from them:
-
-**Mercury (API/CSV):**
-- Clean ISO dates, signed amounts (negative = outflow)
-- Has `bank_description` and `note` fields
-- Transaction ID available for deduplication
-
-**Stripe:**
-- All amounts positive, type in separate column
-- Watch for: fee rows, transfer rows, dispute rows
-- `balance_transaction` ID for deduplication
-
-**QuickBooks Export:**
-- Already categorized — map their categories to our COA
-- May have split transactions (one row per split line)
-- `TxnID` for deduplication
-
-**Shopify:**
-- Gross/fee/net columns — book gross revenue minus fees
-- Order ID for deduplication
-- Watch for refunds appearing as separate rows
+When adding a new source, follow the adapter template above and document the mapping in this file. The CSV/Excel adapter's auto-detect logic handles most bank and card exports without a dedicated adapter.

@@ -314,6 +314,47 @@ DSO: XX days
 
 ---
 
+## AP Aging Report
+
+### Structure
+```
+[Company Name]
+Accounts Payable Aging
+As of [Month DD, YYYY]
+
+Vendor      Invoice#    Date        Due Date    Total       Current     1-30        31-60       61-90       90+
+[Name]      [INV-001]   [MM/DD]     [MM/DD]     $X,XXX      $X,XXX
+[Name]      [INV-002]   [MM/DD]     [MM/DD]     $X,XXX                  $X,XXX
+...
+
+TOTALS                                          =========   =========   =========   =========   =========   =========
+% of Total                                      100%        XX%         XX%         XX%         XX%         XX%
+
+Summary:
+Total AP                    $XX,XXX
+Current (not yet due)       $XX,XXX    XX%
+1-30 Days Past Due          $X,XXX     XX%
+31-60 Days Past Due         $X,XXX     XX%
+61-90 Days Past Due         $XXX       XX%
+Over 90 Days                $XXX       XX%
+
+DPO: XX days
+```
+
+### Conditional Formatting
+- Current: No highlight
+- 1-30: Light yellow background
+- 31-60: Orange background
+- 61-90: Light red background
+- 90+: Red background, bold text
+
+### Implementation Notes
+- DPO (Days Payable Outstanding) = (Average AP / Total Purchases) × Days in Period
+- Include a "Payment Priority" column: HIGH (past due 60+), MEDIUM (past due 30+), LOW (current)
+- Sort by due date ascending (most urgent first) within each aging bucket
+
+---
+
 ## Month-End Close Package
 
 A single workbook with these tabs (in order):
