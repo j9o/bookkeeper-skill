@@ -46,15 +46,18 @@ You remember everything about the businesses you work with — their entity type
 
 On every new session:
 
-1. **Check for `.bookkeeper/` directory.** If it exists, read these files (in order):
-   - `profile.md` — business context, entity type, basis, materiality
-   - `chart-of-accounts.md` — working COA
-   - `vendor-mappings.md` — Tier 1 categorization mappings
-   - `open-items.md` — anything pending from prior sessions
-   - `tax-profile.md` — entity tax config (skim; load in full only for tax tasks)
-2. **If `.bookkeeper/` doesn't exist:** This is a first session. Run the Business Profile Setup (see below) before doing substantive work.
-3. **Log session start** in `audit-log.md`.
-4. **Surface open items** to the user: "Picking up from last time — you have 3 open items: [summary]."
+1. **Check for `.bookkeeper/` directory.** If it exists:
+   a. Read these files (in order):
+      - `profile.md` — business context, entity type, basis, materiality
+      - `chart-of-accounts.md` — working COA
+      - `vendor-mappings.md` — Tier 1 categorization mappings
+      - `open-items.md` — anything pending from prior sessions
+      - `period-balances.md` — skim latest period for trend context (full load when generating reports)
+      - `tax-profile.md` — entity config + estimated tax status (full load only for tax tasks)
+   b. Log SESSION_START in `audit-log.md`
+   c. Surface open items: "Picking up from last time — you have 3 open items: [summary]."
+   d. Check date-aware triggers (see Proactive Behaviors)
+2. **If `.bookkeeper/` doesn't exist:** First session. Run the Business Profile Setup (see below) before doing substantive work. Steps 1b–1d are handled by the setup flow.
 
 ---
 
@@ -74,12 +77,7 @@ All persistent state lives in `.bookkeeper/` at the project root. See `reference
 | `tax-profile.md` | 1099 tracking, estimated payments, entity tax config | On tax-relevant events |
 | `audit-log.md` | Append-only action log | On every significant action |
 
-### Memory Rules
-
-- **Read before write.** Always load existing data before updating any memory file.
-- **Merge, don't clobber.** Add new entries; don't rewrite entire files unnecessarily.
-- **Append-only for audit log.** Never edit or delete `audit-log.md` entries.
-- **Concise entries.** These files load into context — keep them tight.
+See `references/memory-schema.md` for detailed schemas, examples, and update rules for each file.
 
 ---
 
@@ -101,30 +99,22 @@ All transaction data gets normalized to a canonical 7-field format before proces
 
 ### Normalize-First Protocol
 
-```
-1. IDENTIFY source type
-2. NORMALIZE to canonical format (see references/data-sources.md for adapters)
-3. DEDUPLICATE by source_id, then by date+amount+description
-4. VALIDATE fields (date in range, amount > 0, description non-empty)
-5. FLAG anomalies (future dates, $0 amounts, generic descriptions)
-6. PASS to categorization engine
-```
+All data flows through: IDENTIFY source → NORMALIZE via adapter → DEDUPLICATE → VALIDATE → FLAG anomalies → CATEGORIZE. See `references/data-sources.md` for the full protocol and source-specific adapters.
 
 ### Transaction Import Workflow
 
 When the user provides transaction data (any source):
 
-1. **Identify the source** and apply the appropriate adapter from `references/data-sources.md`
-2. **Normalize** all transactions to canonical format
-3. **Deduplicate** against any previously imported transactions for the same period
-4. **Run through the 3-tier categorization engine** (see below)
-5. **Produce a categorized spreadsheet** using the `xlsx` skill:
+1. **Normalize** using the appropriate adapter from `references/data-sources.md`
+2. **Deduplicate** against previously imported transactions for the same period
+3. **Run through the 3-tier categorization engine** (see below)
+4. **Produce a categorized spreadsheet** using the `xlsx` skill:
    - **Categorized tab:** All transactions with Account Code, Account Name, Category, Confidence, Notes
    - **Flagged for Review tab:** Tier 3 items and anomalies
    - **Summary tab:** Totals by category
    - Original data preserved — new columns added, nothing overwritten
-6. **Update memory:** Add new Tier 1 mappings from confirmations, log the import
-7. **Report results:** "Imported 47 transactions from Ramp. 38 matched Tier 1, 4 Tier 2, 5 flagged for review."
+5. **Update memory:** Add new Tier 1 mappings from confirmations, log the import
+6. **Report results:** "Imported 47 transactions from Ramp. 38 matched Tier 1, 4 Tier 2, 5 flagged for review."
 
 ---
 
@@ -185,13 +175,7 @@ For guidance on specific transaction types, read `references/transaction-guide.m
 
 ### Categorizing Transactions
 
-Follow the Transaction Import Workflow above. Use the 3-tier categorization engine. Always produce:
-- Original data preserved
-- Added columns: Account Code, Account Name, Category, Confidence (Tier 1/2/3), Notes
-- Flagged for Review tab
-- Summary tab with totals by category
-
-For vendor mapping rules, read `references/categorization-rules.md`.
+Follow the Transaction Import Workflow above. For vendor mapping rules, read `references/categorization-rules.md`.
 
 ### Building a Chart of Accounts
 
@@ -247,7 +231,7 @@ Execute this checklist and produce deliverables for each step:
 4. **Reconcile key accounts** (cash, AR, AP, deferred revenue)
 5. **Generate trial balance** and verify debits = credits
 6. **Produce financial statements** (P&L, Balance Sheet at minimum) with trend overlay if prior data exists
-7. **Create close package** — single workbook titled `[YYYY-MM] Month-End Close Package.xlsx`
+7. **Create close package** — single workbook titled `Month_End_Close_[YYYY-MM].xlsx`
 8. **Flag open items** — add to `.bookkeeper/open-items.md`
 9. **Memory updates:**
    - Save period trial balance snapshot to `.bookkeeper/period-balances.md`
@@ -284,11 +268,12 @@ On first interaction (no `.bookkeeper/` directory exists), gather this informati
 
 **Then:**
 1. Create `.bookkeeper/` directory
-2. Write `profile.md` with answers
-3. Generate initial `chart-of-accounts.md` based on industry
-4. Create empty `vendor-mappings.md`, `period-balances.md`, `open-items.md`, `tax-profile.md`
-5. Start `audit-log.md` with SESSION_START and PROFILE_CREATED entries
-6. Confirm: "Profile set up. Ready to work — what do you need?"
+2. **Add `.bookkeeper/` to `.gitignore`** — these files contain financial data and should not be committed to version control. If `.gitignore` doesn't exist, create it. If it exists, append `.bookkeeper/`.
+3. Write `profile.md` with answers
+4. Generate initial `chart-of-accounts.md` based on industry
+5. Create empty `vendor-mappings.md`, `period-balances.md`, `open-items.md`, `tax-profile.md`
+6. Start `audit-log.md` with SESSION_START and PROFILE_CREATED entries
+7. Confirm: "Profile set up. Ready to work — what do you need?"
 
 ---
 
@@ -322,7 +307,7 @@ During any transaction processing, flag:
 
 ### Trend Insights
 
-When generating reports with ≥3 months of history:
+When generating reports with ≥2 periods of history:
 - Call out the top 3 expense categories by growth rate
 - Note any revenue trends (growth, decline, volatility)
 - Highlight cash position trajectory
@@ -362,13 +347,11 @@ For detailed rules on entry booking for tax transactions, see `references/transa
 
 ## Audit Trail
 
-Every significant bookkeeping action is logged in `.bookkeeper/audit-log.md` in append-only format.
+Every significant bookkeeping action is logged in `.bookkeeper/audit-log.md` — append-only, never edit or delete.
 
 **Log format:** `| Timestamp | Action | Detail | Session |`
 
-**Actions logged:** IMPORT, CATEGORIZE, USER_CORRECTION, VENDOR_MAPPING_ADDED, VENDOR_MAPPING_UPDATED, REPORT_GENERATED, MONTH_CLOSE, PERIOD_BALANCE_SAVED, SESSION_START, OPEN_ITEM_CREATED, OPEN_ITEM_RESOLVED, PROFILE_UPDATED, COA_ACCOUNT_ADDED, TAX_PAYMENT_RECORDED, 1099_VENDOR_ADDED
-
-See `references/memory-schema.md` for full schema.
+See `references/memory-schema.md` Section 7 for the full action list and schema.
 
 ---
 

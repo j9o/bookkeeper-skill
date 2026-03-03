@@ -1,14 +1,6 @@
 # Transaction Categorization Rules — Tier 2 Reference
 
-This file serves as the **Tier 2** layer in the 3-tier categorization engine:
-
-| Tier | Source | Confidence | Description |
-|------|--------|-----------|-------------|
-| 1    | `.bookkeeper/vendor-mappings.md` | HIGH | Exact matches from user-confirmed categorizations |
-| **2** | **This file** | **MEDIUM** | **Pattern matching on vendor names, amounts, and temporal rules** |
-| 3    | Intelligent inference | LOW | AI-driven categorization — always flagged for review |
-
-**How it works:** During categorization, Tier 1 is checked first. If no match, these Tier 2 rules apply. If Tier 2 can't categorize with reasonable confidence, the transaction falls to Tier 3.
+This file serves as the **Tier 2 (MEDIUM confidence)** layer in the 3-tier categorization engine defined in SKILL.md. Tier 1 (exact match from `.bookkeeper/vendor-mappings.md`) is checked first. If no match, these rules apply. If these can't categorize, the transaction falls to Tier 3 (AI inference, always flagged).
 
 When a user confirms or corrects a Tier 2 categorization, **promote it to Tier 1** by adding the vendor mapping to `.bookkeeper/vendor-mappings.md`.
 
@@ -49,7 +41,7 @@ Never guess on ambiguous transactions. Put them in a "Flagged for Review" tab wi
 | Datadog, PagerDuty, New Relic | Software & Subscriptions | R&D / Infrastructure |
 | OpenAI, Anthropic | Software & Subscriptions | Could be COGS if AI is in the product |
 
-### Payroll & Benefits (6200 - Payroll Expenses)
+### Payroll & Benefits (6000 - Payroll & Wages)
 | Vendor Pattern | Category | Notes |
 |---------------|----------|-------|
 | ADP, Gusto, Rippling, Paychex | Payroll Processing | |
@@ -58,7 +50,7 @@ Never guess on ambiguous transactions. Put them in a "Flagged for Review" tab wi
 | Principal, Fidelity, Vanguard 401k | Retirement Benefits | |
 | IRS, EFTPS, State Tax | Payroll Tax Payments | |
 
-### Office & Facilities (6300 - Rent & Office)
+### Office & Facilities (6200 - Rent & Office)
 | Vendor Pattern | Category | Notes |
 |---------------|----------|-------|
 | WeWork, Regus, Industrious | Rent / Office Space | |
@@ -67,7 +59,7 @@ Never guess on ambiguous transactions. Put them in a "Flagged for Review" tab wi
 | FedEx, UPS, USPS | Shipping / Postage | Could be COGS if product-related |
 | Comcast, AT&T, Verizon | Internet / Telecom | Office = G&A, remote workers = varies |
 
-### Professional Services (6400 - Professional Fees)
+### Professional Services (6300 - Professional Fees)
 | Vendor Pattern | Category | Notes |
 |---------------|----------|-------|
 | [Law firm names] | Legal Fees | |
@@ -75,7 +67,7 @@ Never guess on ambiguous transactions. Put them in a "Flagged for Review" tab wi
 | Deloitte, EY, KPMG, PwC | Audit / Consulting Fees | Distinguish audit vs. advisory |
 | Carta, Pulley | Cap Table / Equity Admin | |
 
-### Sales & Marketing (6500 - S&M)
+### Sales & Marketing (6400 - S&M)
 | Vendor Pattern | Category | Notes |
 |---------------|----------|-------|
 | Google Ads, Facebook Ads, Meta | Digital Advertising | |
@@ -85,7 +77,7 @@ Never guess on ambiguous transactions. Put them in a "Flagged for Review" tab wi
 | SEMrush, Ahrefs, Moz | Marketing Tools | |
 | Eventbrite | Events / Conferences | |
 
-### Travel & Entertainment (6600 - T&E)
+### Travel & Entertainment (6500 - T&E)
 | Vendor Pattern | Category | Notes |
 |---------------|----------|-------|
 | United, Delta, American, Southwest | Airfare | |
@@ -94,7 +86,7 @@ Never guess on ambiguous transactions. Put them in a "Flagged for Review" tab wi
 | Restaurant names | Meals & Entertainment | Check if business purpose documented |
 | Expensify, Navan, Brex Travel | T&E / Expense Platform | |
 
-### Banking & Finance (7000 - Other Expense)
+### Banking & Finance (7100 - Interest Expense / 7300 - Other Expense)
 | Vendor Pattern | Category | Notes |
 |---------------|----------|-------|
 | Stripe, Square, PayPal | Payment Processing Fees | COGS if tied to revenue transactions |
@@ -102,7 +94,7 @@ Never guess on ambiguous transactions. Put them in a "Flagged for Review" tab wi
 | Brex, Ramp, Corporate Card | Credit Card Fees / Payments | Categorize underlying charges, not the payment |
 | Wire Transfer Fee | Bank Fees | |
 
-### Insurance (6700 - Insurance)
+### Insurance (6600 - Insurance)
 | Vendor Pattern | Category | Notes |
 |---------------|----------|-------|
 | Hartford, Travelers, Hiscox | General / Liability Insurance | |

@@ -2,6 +2,8 @@
 
 Entity-aware tax rules, deductibility guidelines, 1099 tracking, and compliance workflows. This file is loaded on demand — reference it from SKILL.md but don't keep it in context unless working on tax-related tasks.
 
+> **Year-specific figures warning:** Dollar limits, mileage rates, and depreciation percentages in this file reference specific tax years. Always verify current-year IRS limits before advising the user — these change annually.
+
 ---
 
 ## Entity-Specific Tax Treatment
@@ -110,7 +112,7 @@ Flag a vendor for 1099 tracking when ANY of these are true:
 - **Bookkeeping note:** Track home office % in tax profile. Apply at tax time or via monthly reimbursement entry.
 
 ### Vehicle / Mileage
-- **Standard mileage rate:** Check IRS rate for current year (67¢/mile for 2024)
+- **Standard mileage rate:** Check IRS rate for current year (was 67¢/mile in 2024 — verify current)
 - **Actual expense method:** Gas, insurance, repairs, depreciation × business use %
 - **Cannot switch:** Once you use actual expenses, generally locked in for that vehicle
 - **Documentation:** Mileage log with date, destination, purpose, miles
@@ -122,7 +124,7 @@ Flag a vendor for 1099 tracking when ANY of these are true:
 - **Includes:** Market research, training, advertising before opening, travel to set up business
 
 ### Depreciation & Section 179
-- **Section 179:** Immediately expense qualifying asset purchases (up to annual limit — $1,160,000 for 2023)
+- **Section 179:** Immediately expense qualifying asset purchases (up to annual limit — was $1,160,000 in 2023 — verify current)
 - **Bonus depreciation:** 60% in 2024, 40% in 2025, 20% in 2026 (phasing out)
 - **Qualifying property:** Equipment, machinery, off-the-shelf software, qualified improvement property
 - **Vehicles:** Limited to $12,400 first-year depreciation (luxury auto limits, unless >6,000 lbs GVWR)
@@ -188,11 +190,7 @@ A business has sales tax obligations in a state when it has:
 | Q3      | Jul 1 – Sep 30 | Sep 15  |
 | Q4      | Oct 1 – Dec 31 | Dec 15  |
 
-### Proactive Triggers
-When the current date approaches these deadlines (within 14 days), remind the user:
-- Estimated tax payment due → Check if payment has been recorded
-- 1099/W-2 deadline → Check if vendor list is complete and W-9s collected
-- Tax return deadline → Remind about filing and suggest year-end review if not done
+Proactive reminders for these deadlines are handled by SKILL.md's Date-Aware Triggers (14-day window).
 
 ---
 
@@ -201,7 +199,7 @@ When the current date approaches these deadlines (within 14 days), remind the us
 Flag these when you notice qualifying patterns in the books:
 
 ### Retirement Plan Contributions
-- **SEP-IRA:** Up to 25% of net SE income (max ~$66,000 for 2023)
+- **SEP-IRA:** Up to 25% of net SE income (max was ~$66,000 in 2023 — verify current)
 - **Solo 401(k):** Employee + employer contributions (higher limits than SEP for same income)
 - **Deadline:** SEP-IRA can be funded until tax filing deadline (including extensions)
 - **Trigger:** High net income + no retirement plan contributions recorded

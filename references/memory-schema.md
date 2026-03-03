@@ -4,9 +4,11 @@ All persistent state lives in `.bookkeeper/` at the project root. Files are mark
 
 **Rules for all memory files:**
 - Create `.bookkeeper/` on first interaction if it doesn't exist
+- **Add `.bookkeeper/` to `.gitignore`** — these files contain financial data and must not be committed to version control
 - Always read existing files before overwriting — merge, don't clobber
 - Use append operations for `audit-log.md` — never rewrite history
 - Keep files concise — these load into context on every session
+- **Never store sensitive PII:** No full Tax IDs (EIN/SSN) — last 4 digits only. No W-9 data (addresses, full TINs). Contractor names in 1099 tracking are acceptable but mailing addresses and TINs should be managed in the user's payroll provider or 1099 filing service, not here.
 
 ---
 
@@ -27,7 +29,7 @@ Captured during onboarding (first session) or updated when the user provides new
 | Materiality        | $500                         |
 | Currency           | USD                          |
 | State of Formation | Delaware                     |
-| Tax ID (last 4)    | **6789                       |
+| Tax ID (last 4)    | **6789                       | ← Never store full EIN/SSN |
 
 ## Notes
 - Elected S-Corp taxation effective 2024
@@ -259,8 +261,8 @@ Every significant bookkeeping action gets logged. Never edit or delete entries.
 - Month-end close (MONTH_CLOSE)
 - Period balance saved (PERIOD_BALANCE_SAVED)
 - Session start (SESSION_START)
+- Profile created or updated (PROFILE_CREATED, PROFILE_UPDATED)
 - Open item created/resolved (OPEN_ITEM_CREATED, OPEN_ITEM_RESOLVED)
-- Profile update (PROFILE_UPDATED)
 - COA change (COA_ACCOUNT_ADDED, COA_ACCOUNT_UPDATED)
 - Tax event (TAX_PAYMENT_RECORDED, 1099_VENDOR_ADDED)
 
