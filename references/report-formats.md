@@ -334,3 +334,69 @@ The Summary tab should be a one-page executive view that a non-accountant can un
 - Cash balance and change from prior month
 - Top 3 expense categories
 - Any items needing attention (past-due AR, unusual expenses, etc.)
+
+---
+
+## Trend Analysis Overlay
+
+When historical data is available in `.bookkeeper/period-balances.md`, overlay trend analysis on any financial report. This is additive — it enhances existing report formats, not a standalone report.
+
+### MoM Comparison Columns
+
+Add these columns to the right of any existing report (P&L, Balance Sheet, or custom):
+
+```
+                              Current Month    Prior Month    MoM $ Change    MoM % Change    3-Mo Avg    vs 3-Mo Avg
+Revenue
+  Subscriptions               $28,000          $26,500        $1,500          5.7%            $26,000     7.7% ▲
+  Services                    $5,000           $8,000         ($3,000)        (37.5%)         $6,500      (23.1%) ▼
+
+Operating Expenses
+  Payroll & Wages             $15,000          $15,000        $0              0.0%            $14,800     1.4% —
+  Software & Subscriptions    $3,400           $2,800         $600            21.4%           $2,900      17.2% ▲
+  Travel & Entertainment      $1,200           $400           $800            200.0%          $600        100.0% ▲▲
+```
+
+### Change Indicators
+
+Use these symbols to make trends scannable at a glance:
+
+| Symbol | Meaning | Rule |
+|--------|---------|------|
+| `▲`    | Favorable increase or unfavorable decrease is notable | Change > 10% vs prior period |
+| `▲▲`   | Large movement requiring attention | Change > 50% vs prior period |
+| `▼`    | Favorable decrease or unfavorable increase is notable | Change > 10% vs prior period |
+| `▼▼`   | Large movement requiring attention | Change > 50% vs prior period |
+| `—`    | Stable | Change ≤ 10% |
+
+**Direction interpretation depends on account type:**
+- **Revenue:** Increase = favorable (▲ green), Decrease = unfavorable (▼ red)
+- **Expenses:** Increase = unfavorable (▲ red), Decrease = favorable (▼ green)
+- **Assets:** Context-dependent (cash increase = good, AR increase = may signal collection issues)
+
+### 3-Month Moving Average
+
+For each line item, calculate and display:
+- `3-Mo Avg` = average of the 3 most recent periods (including current)
+- `vs 3-Mo Avg` = (Current − 3-Mo Avg) / 3-Mo Avg as percentage
+
+This smooths out one-off spikes and helps identify true trends vs noise.
+
+### Anomaly Flags
+
+Automatically flag line items in the trend overlay when:
+
+| Condition | Flag | Action |
+|-----------|------|--------|
+| MoM change > 50% and amount > materiality threshold | `⚠ SPIKE` | Add note explaining what changed |
+| 3+ consecutive months of increase in an expense category | `📈 TREND` | Note the trend for user awareness |
+| New line item (no prior period data) | `🆕 NEW` | Highlight as new category |
+| Line item went to zero (had balance last month) | `⛔ STOPPED` | Confirm if intentional |
+| Duplicate vendor charges (same vendor, same amount, same month) | `🔁 DUPE?` | Flag for review |
+
+### Implementation Notes
+- Only add trend columns when ≥2 periods of historical data exist in `.bookkeeper/period-balances.md`
+- For 3-month average, use available periods if <3 months of history
+- Use conditional formatting: green for favorable trends, red for unfavorable
+- Trend columns go after the core report columns — never rearrange the base report
+- Include a small legend row at the top of the trend columns explaining the symbols

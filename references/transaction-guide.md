@@ -358,3 +358,99 @@ Dr. Retained Earnings                  $X
 ```
 
 After closing entries, only balance sheet accounts (permanent accounts) should have balances. All income statement accounts (temporary accounts) should be zero.
+
+---
+
+## 10. Tax-Related Entries
+
+### Sales Tax Collection (on a sale)
+```
+Dr. Accounts Receivable / Cash         $TOTAL
+    Cr. Revenue                             $SALE_AMOUNT
+    Cr. Sales Tax Payable                   $TAX_AMOUNT
+```
+Sales tax collected is a **liability**, not revenue. You hold it in trust for the taxing authority.
+
+### Sales Tax Remittance (paying the taxing authority)
+```
+Dr. Sales Tax Payable                  $X
+    Cr. Cash                                $X
+```
+This reduces the liability. It is NOT an expense — you're remitting money you collected.
+
+### Estimated Income Tax Payment (Pass-Through Entity — LLC, S-Corp, Partnership)
+Owner pays estimated taxes from personal funds:
+```
+No entry in the business books (personal obligation)
+```
+If owner pays from business account:
+```
+Dr. Owner's Draw / Distributions       $X
+    Cr. Cash                                $X
+```
+This is NOT a business expense — it's a distribution to the owner who uses it for personal tax obligations.
+
+### Estimated Income Tax Payment (C-Corporation)
+```
+Dr. Income Tax Expense                 $X
+    Cr. Cash                                $X
+```
+C-Corps pay their own income tax. This IS a legitimate business expense.
+
+### Quarterly Estimated Tax Accrual (C-Corp, month-end)
+If booking monthly accruals for expected annual tax:
+```
+Dr. Income Tax Expense                 $MONTHLY_ESTIMATE
+    Cr. Income Tax Payable                  $MONTHLY_ESTIMATE
+```
+On quarterly payment:
+```
+Dr. Income Tax Payable                 $QUARTERLY_AMOUNT
+    Cr. Cash                                $QUARTERLY_AMOUNT
+```
+
+### Payroll Tax Deposit
+```
+Dr. Payroll Tax Liabilities            $X
+    Cr. Cash                                $X
+```
+Payroll taxes (employer FICA, FUTA, SUTA) were accrued when payroll was booked. The deposit clears the liability.
+
+### Use Tax (on purchases where sales tax wasn't charged)
+When you buy something from an out-of-state vendor that didn't charge sales tax but your state requires use tax:
+```
+Dr. [Expense/Asset Account]           $PURCHASE_AMOUNT
+Dr. Use Tax Expense (or capitalize)    $TAX_AMOUNT
+    Cr. Cash / AP                           $PURCHASE_AMOUNT
+    Cr. Use Tax Payable                     $TAX_AMOUNT
+```
+Alternatively, if use tax is immaterial, it can be included in the asset/expense cost.
+
+### Tax Refund Received
+**C-Corp:**
+```
+Dr. Cash                               $X
+    Cr. Income Tax Expense                  $X
+```
+(Or credit Income Tax Payable if it was accrued as a receivable)
+
+**Pass-through / Personal (paid from business account originally booked as draw):**
+```
+Dr. Cash                               $X
+    Cr. Owner's Equity / Capital            $X
+```
+
+### Property Tax Payment
+```
+Dr. Property Tax Expense               $X
+    Cr. Cash / AP                           $X
+```
+If prepaying, book as prepaid and amortize monthly:
+```
+Dr. Prepaid Property Tax               $ANNUAL
+    Cr. Cash                                $ANNUAL
+
+Monthly:
+Dr. Property Tax Expense               $ANNUAL/12
+    Cr. Prepaid Property Tax               $ANNUAL/12
+```

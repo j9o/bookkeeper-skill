@@ -1,12 +1,22 @@
-# Transaction Categorization Rules
+# Transaction Categorization Rules — Tier 2 Reference
 
-Use these rules as a starting point when categorizing raw transaction data. Adapt based on the user's specific business and chart of accounts.
+This file serves as the **Tier 2** layer in the 3-tier categorization engine:
+
+| Tier | Source | Confidence | Description |
+|------|--------|-----------|-------------|
+| 1    | `.bookkeeper/vendor-mappings.md` | HIGH | Exact matches from user-confirmed categorizations |
+| **2** | **This file** | **MEDIUM** | **Pattern matching on vendor names, amounts, and temporal rules** |
+| 3    | Intelligent inference | LOW | AI-driven categorization — always flagged for review |
+
+**How it works:** During categorization, Tier 1 is checked first. If no match, these Tier 2 rules apply. If Tier 2 can't categorize with reasonable confidence, the transaction falls to Tier 3.
+
+When a user confirms or corrects a Tier 2 categorization, **promote it to Tier 1** by adding the vendor mapping to `.bookkeeper/vendor-mappings.md`.
 
 ---
 
-## Categorization Strategy
+## Pattern Matching Strategy
 
-### Step 1: Pattern Match on Vendor/Description
+### Step 1: Vendor/Description Pattern Match
 Use the vendor mapping tables below as a first pass. Match on partial strings (vendor names often appear truncated or with extra characters in bank feeds).
 
 ### Step 2: Amount-Based Rules
@@ -14,7 +24,10 @@ Use the vendor mapping tables below as a first pass. Match on partial strings (v
 - Round numbers ($500, $1,000) → May be transfers, owner draws, or loan payments (investigate)
 - Very large one-off amounts → Flag for review (could be asset purchase, loan, or error)
 
-### Step 3: Flag What You Can't Classify
+### Step 3: Temporal Pattern Rules
+See the "Temporal Pattern Rules" section at the end of this file for time-based categorization logic.
+
+### Step 4: Flag What You Can't Classify
 Never guess on ambiguous transactions. Put them in a "Flagged for Review" tab with your best-guess category and a note explaining the ambiguity.
 
 ---
@@ -149,3 +162,48 @@ If a transaction doesn't match any pattern:
 4. If still unsure, categorize as **"Uncategorized Expense"** (6999) and flag for review
 
 It's better to flag 20 transactions for review than to miscategorize 5.
+
+---
+
+## Temporal Pattern Rules
+
+Use these time-based patterns to improve categorization confidence when vendor name matching is ambiguous.
+
+### Recurring Amount Patterns
+When analyzing a transaction set, look for these temporal signatures:
+
+| Pattern | Frequency | Likely Category | Confidence |
+|---------|-----------|----------------|-----------|
+| Same amount, same vendor, 1st of month | Monthly | Rent, SaaS subscription, or lease | MEDIUM-HIGH |
+| Same amount, same vendor, 15th & last day | Semi-monthly | Payroll (common semi-monthly schedule) | MEDIUM-HIGH |
+| Same amount, same vendor, every 2 weeks (14-day cycle) | Bi-weekly | Payroll (bi-weekly schedule) | MEDIUM-HIGH |
+| Same amount, same vendor, quarterly | Quarterly | Insurance premium, estimated taxes, or quarterly subscription | MEDIUM |
+| Same amount, same vendor, annually | Annual | Insurance renewal, annual software license, domain renewal | MEDIUM |
+| Increasing amount, same vendor, monthly | Monthly | Usage-based service (cloud hosting, phone bill) | LOW-MEDIUM |
+
+### Payroll Detection
+Payroll transactions have distinctive signatures. Flag as likely payroll when:
+- **Amount pattern:** Consistent net amount (±5%) every 2 weeks or semi-monthly
+- **Vendor pattern:** Known payroll processors (ADP, Gusto, Rippling, Justworks, etc.)
+- **Cluster pattern:** Multiple debits on the same date to IRS/EFTPS + payroll vendor = payroll run day
+- **Tax deposits:** Amounts to IRS/EFTPS within 1-3 days of a payroll-like transaction = payroll tax deposit
+
+### Tax Payment Detection
+- **Quarterly pattern:** Payments to IRS, EFTPS, or state tax authority on/near Apr 15, Jun 15, Sep 15, Jan 15
+- **Annual pattern:** Large payment to IRS or state in March-April = prior year tax balance due
+- **Payroll taxes:** Payments to IRS/EFTPS that follow payroll dates (see above)
+- **Sales tax:** Payments to state departments of revenue, monthly or quarterly
+
+### Subscription vs. One-Time Purchase
+When a vendor appears only once:
+- If amount < $500 and vendor is a known SaaS/tool → Likely first month of subscription (categorize as subscription, will confirm on recurrence)
+- If amount > typical subscription range for that vendor type → Likely annual prepayment or one-time purchase
+- If no pattern emerges after 2+ months of data → Treat as one-time expense
+
+### Seasonal Patterns
+Some expenses are predictable by time of year:
+- **January:** Annual software renewals, tax prep fees, insurance renewals
+- **March-April:** Tax filing fees, prior-year tax payments
+- **June-July:** Mid-year insurance adjustments
+- **November-December:** Holiday bonuses, charitable contributions, year-end purchases (tax planning)
+- **Year-end:** Increased volume of accrual adjustments and prepayment activity
